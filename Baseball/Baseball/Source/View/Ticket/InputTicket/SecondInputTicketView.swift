@@ -7,64 +7,63 @@
 
 import SwiftUI
 
-struct Team: Hashable {
-    var imageName: String
-    var teamName: String
-}
-
 struct SecondInputTicketView: View {
-    @State private var selectedTeam = ""
-    @Binding var currentPage: Int
+    @EnvironmentObject var viewModel: InputTicketViewModel
     
-    var columns: [GridItem] = Array(repeating: .init(.flexible()), count: 3)
-    var teams: [Team] = [
-        Team(imageName: "house", teamName: "삼성 라이온즈"),
-        Team(imageName: "house", teamName: "LG 트윈스"),
-        Team(imageName: "house", teamName: "롯데 자이언트"),
-        Team(imageName: "house", teamName: "기아 타이거즈"),
-        Team(imageName: "house", teamName: "한화 이글스"),
-        Team(imageName: "house", teamName: "두산 베어스")
-    ]
+    private let columns: [GridItem] = Array(repeating: .init(.flexible()), count: 3)
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("어떤 팀과 경기를 했나요?")
-            Text("상대팀을 선택해주세요.")
+            titleText
             
-            LazyVGrid(columns: columns) {
-                ForEach(teams, id: \.self) { team in
-                    VStack {
-                        Image(systemName: team.imageName)
-                            .resizable()
-                            .scaledToFit()
-                            .padding()
-                            .background(
-                                Circle()
-                                    .fill(selectedTeam == team.teamName ? .gray.opacity(0.8) : .gray.opacity(0.4))
-                                    .stroke(selectedTeam == team.teamName ? .black : .clear)
-                            )
-                        
-                        Text(team.teamName)
-                    }
-                    .onTapGesture {
-                        if selectedTeam == team.teamName {
-                            selectedTeam = ""
-                        } else {
-                            selectedTeam = team.teamName
-                        }
-                    }
-                }
-            }
+            teamsGrid
             
             Spacer()
             
-            Button {
-                currentPage += 1
-            } label: {
-                Text("다음")
-                    .frame(maxWidth: .infinity)
+            NextButton(isActive: !viewModel.ourTeam.isEmpty) {
+                viewModel.currentPage += 1
             }
-            .disabled(selectedTeam.isEmpty)
+        }
+    }
+}
+
+// MARK: - UI
+
+extension SecondInputTicketView {
+    private var titleText: some View {
+        VStack {
+            Text("어떤 팀과 경기를 했나요?")
+            
+            Text("우리팀을 선택해주세요.")
+        }
+        .foregroundColor(.white)
+    }
+    
+    private var teamsGrid: some View {
+        LazyVGrid(columns: columns) {
+            ForEach(viewModel.teams, id: \.self) { team in
+                VStack {
+                    Image(systemName: team.imageName)
+                        .resizable()
+                        .scaledToFit()
+                        .padding()
+                        .background(
+                            Circle()
+                                .fill(.gray.opacity(0.4))
+                                .stroke(viewModel.ourTeam == team.teamName ? .white : .clear)
+                        )
+                    
+                    Text(team.teamName)
+                        .foregroundColor(.white)
+                }
+                .onTapGesture {
+                    if viewModel.ourTeam == team.teamName {
+                        viewModel.ourTeam = ""
+                    } else {
+                        viewModel.ourTeam = team.teamName
+                    }
+                }
+            }
         }
     }
 }

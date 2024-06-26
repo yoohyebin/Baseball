@@ -9,56 +9,102 @@ import SwiftUI
 
 struct InputTicketView: View {
     @Environment(\.presentationMode) var presentationMode
-    @State private var currentPage = 0
+    @StateObject private var inputTicketViewModel = InputTicketViewModel()
+    
+    @State private var currentStatus = InputStatus.writing
     
     var body: some View {
+        ZStack {
+            Color.black
+                .ignoresSafeArea()
+            
+            if currentStatus == .writing {
+                writingView
+            } else if currentStatus == .saving {
+                completeView
+            } else {
+                TicketView()
+            }
+        }
+    }
+}
+
+// MARK: - UI
+
+extension InputTicketView {
+    private var writingView: some View {
         VStack {
-            HStack {
-                Button {
-                    currentPage = max(0, currentPage-1)
-                } label: {
-                    Image(systemName: "chevron.left")
-                }
-                
-                Spacer()
-                
-                Text("티켓 추가하기")
-                
-                Spacer()
-            }
-            .padding(.horizontal)
+            writingViewHeader
             
-            HStack(spacing: 0) {
-                Rectangle()
-                    .fill(currentPage>=1 ? .black : .gray)
-                Rectangle()
-                    .fill(currentPage>=2 ? .black : .gray)
-                Rectangle()
-                    .fill(currentPage>=3 ? .black : .gray)
-            }
-            .frame(height: 5)
-            .mask {
-                RoundedRectangle(cornerRadius: 2.5)
-            }
-            .padding(.horizontal)
+            ProgressView(value: Double(inputTicketViewModel.currentPage), total: 4)
+                .progressViewStyle(LinearProgressViewStyle(tint: .white))
+                .padding(.horizontal)
             
-            TabView(selection: $currentPage) {
-                FirstInputTicketView(currentPage: $currentPage)
-                    .tag(0)
-                
-                SecondInputTicketView(currentPage: $currentPage)
-                    .tag(1)
-                
-                ThirdInputTicketView(currentPage: $currentPage)
-                    .tag(2)
-                
-                FourthInputTicketView(currentPage: $currentPage)
-                    .tag(3)
-            }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .padding()
+            writingTabView
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    private var writingViewHeader: some View {
+        HStack {
+            Button {
+                if inputTicketViewModel.currentPage == 0 {
+                    self.presentationMode.wrappedValue.dismiss()
+                } else {
+                    inputTicketViewModel.currentPage -= 1
+                }
+            } label: {
+                Image(systemName: "chevron.left")
+                    .foregroundColor(.white)
+            }
+            
+            Spacer()
+            
+            Text("티켓 추가하기")
+                .bold()
+                .foregroundColor(.white)
+            
+            Spacer()
+        }
+        .padding(.horizontal)
+    }
+    
+    private var writingTabView: some View {
+        TabView(selection: $inputTicketViewModel.currentPage) {
+            FirstInputTicketView()
+                .environmentObject(inputTicketViewModel)
+                .tag(0)
+            
+            SecondInputTicketView()
+                .environmentObject(inputTicketViewModel)
+                .tag(1)
+            
+            ThirdInputTicketView()
+                .environmentObject(inputTicketViewModel)
+                .tag(2)
+            
+            FourthInputTicketView()
+                .environmentObject(inputTicketViewModel)
+                .tag(3)
+            
+            FifthInputTicketView(currentStatus: $currentStatus)
+                .environmentObject(inputTicketViewModel)
+                .tag(4)
+        }
+        .tabViewStyle(.page(indexDisplayMode: .never))
+        .onAppear {
+            UIScrollView.appearance().isScrollEnabled = false
+        }
+        .padding()
+    }
+    
+    private var completeView: some View {
+        CompleteTicketView()
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now()+2.0) {
+                    currentStatus = .done
+                }
+            }
     }
 }
 

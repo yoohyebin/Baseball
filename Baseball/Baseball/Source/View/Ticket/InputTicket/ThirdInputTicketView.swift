@@ -8,54 +8,61 @@
 import SwiftUI
 
 struct ThirdInputTicketView: View {
-    @State private var ourTeamScore = ""
-    @State private var opponentTeamScore = ""
+    @EnvironmentObject var viewModel: InputTicketViewModel
     
-    @Binding var currentPage: Int
+    private let columns: [GridItem] = Array(repeating: .init(.flexible()), count: 3)
     
     var body: some View {
-        VStack {
-            Text("점수가 어떻게 되었나요?")
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            HStack(alignment: .bottom) {
-                VStack {
-                    Text("삼성 라이온즈")
-                    
-                    TextField("", text: $ourTeamScore)
-                        .multilineTextAlignment(.center)
-                        .keyboardType(.numberPad)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(.gray)
-                        )
-                }
-                
-                Text(":")
-                    .padding()
-                
-                VStack {
-                    Text("LG 트윈스")
-                    TextField("", text: $opponentTeamScore)
-                        .multilineTextAlignment(.center)
-                        .keyboardType(.numberPad)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(.gray)
-                        )
-                }
-            }
-            .padding()
+        VStack(alignment: .leading) {
+            titleText
+            
+            teamsGrid
             
             Spacer()
             
-            Button {
-                currentPage += 1
-            } label: {
-                Text("다음")
-                    .frame(maxWidth: .infinity)
+            NextButton(isActive: !viewModel.opponentTeam.isEmpty) {
+                viewModel.currentPage += 1
+            }
+        }
+    }
+}
+
+// MARK: - UI
+
+extension ThirdInputTicketView {
+    private var titleText: some View {
+        VStack {
+            Text("어떤 팀과 경기를 했나요?")
+            
+            Text("상대팀을 선택해주세요.")
+        }
+        .foregroundColor(.white)
+    }
+    
+    private var teamsGrid: some View {
+        LazyVGrid(columns: columns) {
+            ForEach(viewModel.teams, id: \.self) { team in
+                VStack {
+                    Image(systemName: team.imageName)
+                        .resizable()
+                        .scaledToFit()
+                        .padding()
+                        .background(
+                            Circle()
+                                .fill(.gray.opacity(0.4))
+                                .stroke(viewModel.opponentTeam == team.teamName ? .white : .clear)
+                        )
+                    
+                    Text(team.teamName)
+                        .foregroundColor(.white)
+                }
+                .onTapGesture {
+                    if viewModel.opponentTeam == team.teamName {
+                        viewModel.opponentTeam = ""
+                    } else {
+                        viewModel.opponentTeam = team.teamName
+                    }
+                }
             }
         }
     }

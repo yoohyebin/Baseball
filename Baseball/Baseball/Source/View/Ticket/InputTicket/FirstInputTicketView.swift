@@ -8,50 +8,84 @@
 import SwiftUI
 
 struct FirstInputTicketView: View {
-    @State private var date = Date()
-    @State private var place = ""
-    @State private var isShowDatePicker = false
+    @EnvironmentObject var viewModel: InputTicketViewModel
+    @FocusState private var isFocused: Bool
     
-    @Binding var currentPage: Int
+    @State private var isShowDatePicker = false
     
     var body: some View {
         VStack(alignment: .leading) {
+            inputDate
+            
+            inputPlace
+            
+            Spacer()
+            
+            NextButton(isActive: !viewModel.place.isEmpty) {
+                isFocused = false
+                viewModel.currentPage += 1
+            }
+            
+            if isShowDatePicker {
+                datePicker
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            isFocused = false
+            isShowDatePicker = false
+        }
+        .onAppear {
+            UIScrollView.appearance().isScrollEnabled = true
+        }
+    }
+}
+
+// MARK: - UI
+
+extension FirstInputTicketView {
+    private var inputDate: some View {
+        VStack {
             Text("언제 경기를 봤나요?")
-            Text("24.03.07")
+                .foregroundColor(.white)
+            
+            Text(viewModel.date.dateToString())
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .foregroundStyle(.gray)
+                .foregroundStyle(.white)
                 .background {
                     RoundedRectangle(cornerRadius: 20)
                         .fill(.gray.opacity(0.4))
                         .onTapGesture {
+                            isFocused = false
                             isShowDatePicker = true
                         }
                 }
-            
+        }
+    }
+    
+    private var inputPlace: some View {
+        VStack {
             Text("어디서 봤나요?")
-            TextField("고척돔", text: $place)
+                .foregroundColor(.white)
+            
+            TextField("고척돔", text: $viewModel.place)
+                .focused($isFocused)
                 .padding()
+                .colorScheme(.dark)
                 .background {
                     RoundedRectangle(cornerRadius: 20)
                         .fill(.gray.opacity(0.4))
                 }
-            
-            Spacer()
-            Button {
-                currentPage += 1
-            } label: {
-                Text("다음")
-                    .frame(maxWidth: .infinity)
-            }
-            
-            if isShowDatePicker {
-                DatePicker("", selection: $date, displayedComponents: .date)
-                    .datePickerStyle(WheelDatePickerStyle())
-                    .labelsHidden()
-                    .frame(maxWidth: .infinity)
-            }
         }
+    }
+    
+    private var datePicker: some View {
+        DatePicker("", selection: $viewModel.date, displayedComponents: .date)
+            .datePickerStyle(WheelDatePickerStyle())
+            .labelsHidden()
+            .colorScheme(.dark)
+            .frame(maxWidth: .infinity)
     }
 }
 
