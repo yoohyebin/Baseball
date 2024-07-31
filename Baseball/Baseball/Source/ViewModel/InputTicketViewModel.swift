@@ -23,6 +23,7 @@ class InputTicketViewModel: ObservableObject {
     @Published var opponentTeam = ""
     @Published var ourTeamScore = ""
     @Published var opponentTeamScore = ""
+    @Published var todayTitle = ""
     @Published var todayComment = ""
     @Published var currentEmotion = ""
     
@@ -36,9 +37,9 @@ class InputTicketViewModel: ObservableObject {
     ]
     
     let emotions: [(img: String, text: String)] = [
-        ("", "화나요"),
-        ("", "평범해요"),
-        ("", "신나요")
+        ("😡", "화나요"),
+        ("😗", "평범해요"),
+        ("😆", "신나요")
     ]
     
     func saveData() {
