@@ -29,8 +29,6 @@ struct MainView: View {
                         
                         addTicketSection
                         
-                        divider
-                        
                         ticketDisplayView
                     }
                     .padding(16)
@@ -60,6 +58,10 @@ struct MainView: View {
                         .transition(.asymmetric(insertion: .move(edge: .bottom).combined(with: .opacity), removal: .move(edge: .trailing).combined(with: .opacity)))
                         .animation(.easeInOut, value: moveTicketView)
                 }
+                
+                addTicketButton
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .padding(.trailing, 17)
             }
         }
     }
@@ -69,13 +71,14 @@ struct MainView: View {
 
 extension MainView {
     private var mainHeader: some View {
-        Text("최강 삼성!")
+        Text("RUSH!")
             .font(.system(size: 20))
-            .bold()
+            .italic()
+            .fontWeight(.heavy)
             .foregroundStyle(.text)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 12)
-            .padding(.bottom, 16)
+            .padding(.bottom, 20)
     }
 }
 
@@ -84,30 +87,54 @@ extension MainView {
 extension MainView {
     private var addTicketSection: some View {
         ZStack {
-            Path { path in
-                path.move(to: CGPoint(x: 15, y: 0))
+            ZStack {
+                Path { path in
+                    path.move(to: CGPoint(x: 15, y: 0))
+                    
+                    path.addLine(to: CGPoint(x: 343, y: 0))
+                    path.addArc(center: CGPoint(x: 343, y: 15), radius: 15, startAngle: .degrees(-90), endAngle: .degrees(0), clockwise: false)
+                    
+                    path.addLine(to: CGPoint(x: 358, y: 160))
+                    path.addArc(center: CGPoint(x: 343, y: 160), radius: 15, startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
+                    
+                    path.addLine(to: CGPoint(x: 194, y: 175))
+                    path.addArc(center: CGPoint(x: 209, y: 160), radius: 15, startAngle: .degrees(90), endAngle: .degrees(180), clockwise: false)
+                    
+                    path.addLine(to: CGPoint(x: 194, y: 129))
+                    path.addArc(center: CGPoint(x: 167, y: 156), radius: 27, startAngle: .degrees(0), endAngle: .degrees(-90), clockwise: true)
+                    
+                    path.addLine(to: CGPoint(x: 15, y: 129))
+                    path.addArc(center: CGPoint(x: 15, y: 114), radius: 15, startAngle: .degrees(90), endAngle: .degrees(180), clockwise: false)
+                    
+                    path.addLine(to: CGPoint(x: 0, y: 15))
+                    path.addArc(center: CGPoint(x: 15, y: 15), radius: 15, startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false)
+                    
+                    path.closeSubpath()
+                }
+                .fill(.box)
                 
-                path.addLine(to: CGPoint(x: 343, y: 0))
-                path.addArc(center: CGPoint(x: 343, y: 15), radius: 15, startAngle: .degrees(-90), endAngle: .degrees(0), clockwise: false)
-                
-                path.addLine(to: CGPoint(x: 358, y: 160))
-                path.addArc(center: CGPoint(x: 343, y: 160), radius: 15, startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
-                
-                path.addLine(to: CGPoint(x: 194, y: 175))
-                path.addArc(center: CGPoint(x: 209, y: 160), radius: 15, startAngle: .degrees(90), endAngle: .degrees(180), clockwise: false)
-                
-                path.addLine(to: CGPoint(x: 194, y: 129))
-                path.addArc(center: CGPoint(x: 167, y: 156), radius: 27, startAngle: .degrees(0), endAngle: .degrees(-90), clockwise: true)
-                
-                path.addLine(to: CGPoint(x: 15, y: 129))
-                path.addArc(center: CGPoint(x: 15, y: 114), radius: 15, startAngle: .degrees(90), endAngle: .degrees(180), clockwise: false)
-                
-                path.addLine(to: CGPoint(x: 0, y: 15))
-                path.addArc(center: CGPoint(x: 15, y: 15), radius: 15, startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false)
-                
-                path.closeSubpath()
+                ZStack {
+                    VStack(spacing: 8) {
+                        Text("새로운 경기를 봤나요?")
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        Text("기록해서 티켓을 만들어요!")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .foregroundStyle(.text)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(.top, 12)
+                    
+                    Image(.addTicket)
+                        .resizable()
+                        .frame(maxWidth: 189, maxHeight: 137)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.top, 25)
+                }
+                .padding(.leading, 16)
+                .padding(.trailing, 5)
             }
-            .fill(.box)
             
             VStack {
                 Spacer()
@@ -133,18 +160,7 @@ extension MainView {
             }
             .frame(height: 175)
         }
-        .padding(.bottom, 21)
-    }
-}
-
-// MARK: - divider
-
-extension MainView {
-    private var divider: some View {
-        Rectangle()
-            .fill(.divder)
-            .frame(height: 1)
-            .padding(.bottom, 10)
+        .padding(.bottom, 31)
     }
 }
 
@@ -161,6 +177,7 @@ private var ticketDisplayView: some View {
                 .padding(.horizontal, 12)
             
             if ticketData.isEmpty {
+                ticketTags
                 noTicketView
             } else {
                 VStack(spacing: 0) {
@@ -177,14 +194,19 @@ private var ticketDisplayView: some View {
 extension MainView {
     private var noTicketView: some View {
         VStack {
-            Spacer(minLength: 160)
-            
-            Text("아직 저장된 티켓이 없어요!")
-            Text("야구 경기를 보러 갈까요?")
+            Text("아직 저장된 티켓이 없어요")
+            Text("경기를 기록해주세요!")
         }
-        .foregroundColor(.text)
-        .font(.system(size: 16))
-        .frame(maxHeight: .infinity)
+        .foregroundStyle(.caption)
+        .frame(height: 160)
+        .frame(maxWidth: .infinity)
+        .background {
+            LinearGradient(gradient: Gradient(colors: [.noTicketGradient1, .noTicketGradient2]), startPoint: /*@START_MENU_TOKEN@*/.leading/*@END_MENU_TOKEN@*/, endPoint: /*@START_MENU_TOKEN@*/.trailing/*@END_MENU_TOKEN@*/)
+        }
+        .clipShape(TicketShape(cornerRadius: 8, cutRadius: 40))
+        .modifier(TicketStroke(cornerRadius: 8, cutRadius: 40))
+        .padding(.horizontal, 9)
+        .padding(.bottom, 16)
     }
 }
 
@@ -204,7 +226,7 @@ extension MainView {
             .background {
                 RoundedRectangle(cornerRadius: 15.0)
                     .fill(.clear)
-                    .stroke(.stroke)
+                    .stroke(ticketData.isEmpty ? .caption : .stroke)
             }
             
             Button {
@@ -218,10 +240,10 @@ extension MainView {
             .background {
                 RoundedRectangle(cornerRadius: 15.0)
                     .fill(.clear)
-                    .stroke(.stroke)
+                    .stroke(ticketData.isEmpty ? .caption : .stroke)
             }
         }
-        .foregroundStyle(.text)
+        .foregroundStyle(ticketData.isEmpty ? .caption : .text)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 12)
         .padding(.bottom, 16)
@@ -273,14 +295,29 @@ extension MainView {
                 .padding(.horizontal, 14)
                 .padding(.top, 38)
                 .padding(.bottom, 17)
+                .frame(height: 160)
                 .background {
                     LinearGradient(gradient: Gradient(colors: [data.ourTeam.colorTeam(), data.opponentTeam.colorTeam()]), startPoint: /*@START_MENU_TOKEN@*/.leading/*@END_MENU_TOKEN@*/, endPoint: /*@START_MENU_TOKEN@*/.trailing/*@END_MENU_TOKEN@*/)
                 }
                 .clipShape(TicketShape(cornerRadius: 8, cutRadius: 40))
-                .frame(height: 160)
+                .modifier(TicketStroke(cornerRadius: 8, cutRadius: 40))
                 .padding(.horizontal, 9)
                 .padding(.bottom, 16)
             }
+        }
+    }
+}
+
+// MARK: - addTicketButton
+
+extension MainView {
+    private var addTicketButton: some View {
+        Button {
+            moveInputTicketView = true
+        } label: {
+            Image(.addTicketButton)
+                .resizable()
+                .frame(width: 68, height: 68)
         }
     }
 }
